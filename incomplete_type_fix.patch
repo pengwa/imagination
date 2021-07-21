@@ -1,0 +1,96 @@
+diff --git a/test/jit/test_tracer.py b/test/jit/test_tracer.py
+index 43047e8da3..8fcd1e6354 100644
+--- a/test/jit/test_tracer.py
++++ b/test/jit/test_tracer.py
+@@ -1391,7 +1391,6 @@ class TestTracer(JitTestCase):
+                 return torch.neg(grad_output)
+ 
+ 
+-
+         class TracedModule(torch.nn.Module):
+             def forward(self, x):
+                 return torch.relu(TestFunc.apply(x))
+@@ -1407,6 +1406,47 @@ class TestTracer(JitTestCase):
+ 
+         traced = torch.jit.trace(Wrapper(), (torch.rand(3, 4),))
+ 
++    def test_trace_multi_output_function(self):
++        # An autograd.Function with two outputs.
++        # It swaps inputs so we can check if shape
++        # handling is correct in TorchScript.
++        class Foo(torch.autograd.Function):
++            @staticmethod
++            def forward(ctx, x, y):
++                return y, x
++
++            @staticmethod
++            def backward(ctx, du, dv):
++                return dv, du
++
++        class Bar(torch.nn.Module):
++            def forward(self, x, y):
++                x = x.relu()
++                y = y.relu()
++                z = Foo.apply(x, y)
++                return z
++
++        x = torch.rand(3, 2)
++        y = torch.rand(1, 2)
++
++        traced = torch.jit.trace(Bar(), (x, y))
++
++        for n in traced.graph.nodes():
++            if n.kind() != 'prim::PythonOp':
++                continue
++            for o in n.outputs():
++                if o.type().kind() != 'TupleType':
++                    continue
++                for e in o.type().elements():
++                    # In this test, tensor elements in a tuple output 
++                    # can't have unknown shapes.
++                    assert e.dim()
++
++        u, v = traced(x, y)
++
++        self.assertEqual(u, y)
++        self.assertEqual(v, x)
++
+     def test_interpolate_trace(self):
+         class test(nn.Module):
+             def __init__(self):
+diff --git a/torch/csrc/autograd/python_function.cpp b/torch/csrc/autograd/python_function.cpp
+index 1f787137f6..af32f400df 100644
+--- a/torch/csrc/autograd/python_function.cpp
++++ b/torch/csrc/autograd/python_function.cpp
+@@ -497,9 +497,12 @@ static void _trace_post_record(
+   int num_outputs = PyTuple_GET_SIZE(output_objects);
+   auto graph = node->owningGraph();
+   node->addOutput();
++  auto old_node = node;
+   if (!unpack_output) {
+     std::vector<TypePtr> tuple_values(num_outputs, TensorType::get());
+     TypePtr tuple_type = TupleType::create(std::move(tuple_values));
++    // Original type is tuple of tensors "without" element type and shape.
++    // The missed parts will be added below.
+     node->output()->setType(tuple_type);
+     auto unpacked = graph->createTupleUnpack(node->output())->insertAfter(node);
+     node = unpacked;
+@@ -515,6 +518,18 @@ static void _trace_post_record(
+       }
+     }
+   }
++  // If TupleUnpack operator is created, we copy its output type back
++  // to the original tuple type.
++  if (!unpack_output) {
++    std::vector<TypePtr> new_tuple_values;
++    for (int i = 0; i < num_outputs; ++i) {
++      TypePtr ptr = node->outputs()[i]->type();
++      new_tuple_values.push_back(ptr);
++    }
++    TypePtr tuple_type = TupleType::create(std::move(new_tuple_values));
++    // The i-th tuple element receives a new tensor type with element type and shape.
++    old_node->output()->setType(tuple_type);
++  }
+ }
+ 
+ PyObject* process_outputs(PyObject *op_obj, const std::shared_ptr<PyNode>& cdata,
