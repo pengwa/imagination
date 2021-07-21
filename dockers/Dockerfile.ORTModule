@@ -14,25 +14,25 @@ RUN apt-get -y update &&\
         git \
         language-pack-en \
         openssh-client \
-        unattended-upgrades
+        unattended-upgrades \
+        vim gdb clang-format htop &&\
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /stage
 # install miniconda (comes with python 3.7 default)
 ARG CONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh
 RUN cd /stage && curl -fSsL --insecure ${CONDA_URL} -o install-conda.sh &&\
     /bin/bash ./install-conda.sh -b -p /opt/conda &&\
-    /opt/conda/bin/conda clean -ya
+    /opt/conda/bin/conda clean -ya && rm /stage/* -rf
 ENV PATH=/opt/conda/bin:${PATH}
 
 # install cmake, setuptools, numpy, and onnx
-RUN conda install -y \
+RUN pip install --no-cache-dir \
         setuptools \
         cmake \
-        numpy=${NUMPY_VERSION} &&\
-    pip install \
-        onnx=="${ONNX_VERSION}"
-
-# install cerberus for the new pytorch front-end
-RUN pip install cerberus
+        numpy==${NUMPY_VERSION} \
+        onnx=="${ONNX_VERSION}" cerberus \
+        pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas sympy 
 
 # build ucx suite
 # note: openmpi will not select ucx without multithreading enabled
@@ -49,7 +49,8 @@ RUN apt-get -y update && apt-get -y --no-install-recommends install \
         --with-verbs=/usr/lib/x86_64-linux-gnu \
         --enable-mt &&\
     make -j"$(nproc)" &&\
-    make install
+    make install &&\
+    rm -rf /var/lib/apt/lists/* && rm /stage/* -rf
 
 # build openmpi (use --prefix /opt/openmpi-xxx to move to runtime image)
 # note: require --enable-orterun-prefix-by-default for Azure machine learning compute
@@ -68,15 +69,14 @@ RUN export OMPI_BASE=${OPENMPI_VERSION%.*} &&\
         --enable-orterun-prefix-by-default \
         --enable-mca-no-build=btl-uct &&\
     make -j"$(nproc)" install &&\
-    ldconfig
+    ldconfig &&\
+    rm /stage/* -rf
+
 ENV PATH=${OPENMPI_PATH}/bin:$PATH
 ENV LD_LIBRARY_PATH=${OPENMPI_PATH}/lib:$LD_LIBRARY_PATH
 
 # install mpi4py (be sure to link existing /opt/openmpi-xxx)
 RUN CC=mpicc MPICC=mpicc pip install mpi4py --no-binary mpi4py
-
-RUN apt-get -y update &&\
-    apt-get -y --no-install-recommends install vim
 
 ENV MOFED_VERSION=5.0-1.0.0.0
 ENV MOFED_OS=ubuntu18.04
@@ -84,17 +84,16 @@ ENV MOFED_OS=ubuntu18.04
 ENV MOFED_FILENAME=MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64
 
 RUN cd /stage && curl -fSsL https://www.mellanox.com/downloads/ofed/MLNX_OFED-${MOFED_VERSION}/${MOFED_FILENAME}.tgz | tar -zxpf - &&\
-    cd MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64 && apt-get update && apt-get -y install udev libcap2 && ./mlnxofedinstall --force --user-space-only --without-fw-update 
+    cd MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64 && apt-get update && apt-get -y install udev libcap2 && ./mlnxofedinstall --force --user-space-only --without-fw-update  &&\
+    rm /stage/* -rf
 
-RUN pip install --pre torch torchvision torchaudio -f https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html
+#RUN pip install --no-cache-dir --pre torch torchvision torchaudio -f https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html
 
 # Install AzureML support and commonly used packages.
-RUN pip install azureml-defaults sentencepiece==0.1.92 transformers==4.3.3 msgpack==1.0.0 tensorboardX==1.8 tensorboard==2.3.0 &&\
-    pip install pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas keras tensorflow sklearn sympy 
+#RUN pip install azureml-defaults sentencepiece==0.1.92 transformers==4.3.3 msgpack==1.0.0 tensorboardX==1.8 tensorboard==2.3.0 &&\
+#    pip install pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas keras tensorflow sklearn sympy 
 
 # This will increase image size, but make it easier to install/uninstall pkgs within dockers.
 #RUN chmod 777 /opt/conda -R # to allow pip install within container
-
-RUN rm -fr /stage
 
 
