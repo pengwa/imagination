@@ -15,7 +15,7 @@ RUN apt-get -y update &&\
         language-pack-en \
         openssh-client \
         unattended-upgrades \
-        vim gdb clang-format htop &&\
+        vim gdb clang-format htop libz-dev &&\
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /stage
@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir \
         cmake \
         numpy==${NUMPY_VERSION} \
         onnx=="${ONNX_VERSION}" cerberus \
-        pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas sympy 
+        pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas sympy pyyaml
 
 # build ucx suite
 # note: openmpi will not select ucx without multithreading enabled
