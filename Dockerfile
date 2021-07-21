@@ -1,0 +1,100 @@
+FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu18.04
+
+ARG UCX_VERSION=1.8.0
+ARG OPENMPI_VERSION=4.0.4
+ARG CONDA_VERSION=4.7.10
+ARG NUMPY_VERSION=1.18.5
+ARG ONNX_VERSION=1.7.0
+ARG OPENMPI_PATH=/opt/openmpi-${OPENMPI_VERSION}
+
+# install curl, git, ssh (required by MPI when running ORT tests)
+RUN apt-get -y update &&\
+    apt-get -y --no-install-recommends install \
+        curl \
+        git \
+        language-pack-en \
+        openssh-client \
+        unattended-upgrades
+WORKDIR /stage
+# install miniconda (comes with python 3.7 default)
+ARG CONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh
+RUN cd /stage && curl -fSsL --insecure ${CONDA_URL} -o install-conda.sh &&\
+    /bin/bash ./install-conda.sh -b -p /opt/conda &&\
+    /opt/conda/bin/conda clean -ya
+ENV PATH=/opt/conda/bin:${PATH}
+
+# install cmake, setuptools, numpy, and onnx
+RUN conda install -y \
+        setuptools \
+        cmake \
+        numpy=${NUMPY_VERSION} &&\
+    pip install \
+        onnx=="${ONNX_VERSION}"
+
+# install cerberus for the new pytorch front-end
+RUN pip install cerberus
+
+# build ucx suite
+# note: openmpi will not select ucx without multithreading enabled
+ARG UCX_TARNAME=ucx-$UCX_VERSION
+ARG UCX_URL=https://github.com/openucx/ucx/releases/download/v${UCX_VERSION}/${UCX_TARNAME}.tar.gz
+RUN apt-get -y update && apt-get -y --no-install-recommends install \
+        libibverbs-dev \
+        libnuma-dev &&\
+    cd /stage && curl -fSsL ${UCX_URL} | tar xzf - &&\
+    cd ${UCX_TARNAME} &&\
+    ./configure \
+	--prefix=/opt/ucx \
+        --with-cuda=/usr/local/cuda \
+        --with-verbs=/usr/lib/x86_64-linux-gnu \
+        --enable-mt &&\
+    make -j"$(nproc)" &&\
+    make install
+
+# build openmpi (use --prefix /opt/openmpi-xxx to move to runtime image)
+# note: require --enable-orterun-prefix-by-default for Azure machine learning compute
+# note: disable verbs as we use ucx middleware and don't want btl openib warnings
+ARG OPENMPI_TARNAME=openmpi-${OPENMPI_VERSION}
+ARG OPENMPI_URL=https://download.open-mpi.org/release/open-mpi/v%OMPI_BASE%/${OPENMPI_TARNAME}.tar.gz
+RUN export OMPI_BASE=${OPENMPI_VERSION%.*} &&\
+    cd /stage && curl -fSsL `echo ${OPENMPI_URL} | sed s/%OMPI_BASE%/$OMPI_BASE/` | tar xzf - &&\
+    cd ${OPENMPI_TARNAME} &&\
+    ./configure \
+        --prefix=${OPENMPI_PATH} \
+        --with-ucx=/opt/ucx \
+        --without-verbs \
+        --with-cuda=/usr/local/cuda \
+        --enable-mpirun-prefix-by-default \
+        --enable-orterun-prefix-by-default \
+        --enable-mca-no-build=btl-uct &&\
+    make -j"$(nproc)" install &&\
+    ldconfig
+ENV PATH=${OPENMPI_PATH}/bin:$PATH
+ENV LD_LIBRARY_PATH=${OPENMPI_PATH}/lib:$LD_LIBRARY_PATH
+
+# install mpi4py (be sure to link existing /opt/openmpi-xxx)
+RUN CC=mpicc MPICC=mpicc pip install mpi4py --no-binary mpi4py
+
+RUN apt-get -y update &&\
+    apt-get -y --no-install-recommends install vim
+
+ENV MOFED_VERSION=5.0-1.0.0.0
+ENV MOFED_OS=ubuntu18.04
+# http://content.mellanox.com/ofed/MLNX_OFED-5.0-1.0.0.0/MLNX_OFED_LINUX-5.0-1.0.0.0-ubuntu18.04-x86_64.tgz
+ENV MOFED_FILENAME=MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64
+
+RUN cd /stage && curl -fSsL https://www.mellanox.com/downloads/ofed/MLNX_OFED-${MOFED_VERSION}/${MOFED_FILENAME}.tgz | tar -zxpf - &&\
+    cd MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64 && apt-get update && apt-get -y install udev libcap2 && ./mlnxofedinstall --force --user-space-only --without-fw-update 
+
+RUN pip install --pre torch torchvision torchaudio -f https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html
+
+# Install AzureML support and commonly used packages.
+RUN pip install azureml-defaults sentencepiece==0.1.92 transformers==4.3.3 msgpack==1.0.0 tensorboardX==1.8 tensorboard==2.3.0 &&\
+    pip install pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas keras tensorflow sklearn sympy 
+
+# This will increase image size, but make it easier to install/uninstall pkgs within dockers.
+#RUN chmod 777 /opt/conda -R # to allow pip install within container
+
+RUN rm -fr /stage
+
+
