@@ -23,10 +23,10 @@ do
     do 
       name=pt_b${b}_h${h}_l${l}
       echo "handling $name"
-      $p -o $name ${options} --batch ${b} --hidden ${h} --layer ${l} --tag $name 2>&1 > $name.txt
+      $p -o $name ${options} --batch ${b} --hidden ${h} --layer ${l} --tag $name >> res_$name.txt 2>&1 
       ort_name=ort_b${b}_h${h}_l${l}
       echo "handling $ort_name"
-      $p -o $ort_name ${options} --batch ${b} --hidden ${h} --layer ${l} --ort --tag $ort_name 2>&1 > $ort_name.txt
+      $p -o $ort_name ${options} --batch ${b} --hidden ${h} --layer ${l} --ort --tag $ort_name >> res_$ort_name.txt 2>&1 
     done
   done
 done
