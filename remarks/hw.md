@@ -14,3 +14,5 @@ https://en.wikipedia.org/wiki/AMD_Accelerated_Processing_Unit
 https://en.wikipedia.org/wiki/Zen_(microarchitecture)
 
 https://rocmdocs.amd.com/en/latest/ROCm_Tools/ROCm-Tools.html
+
+https://developer.nvidia.com/buy-jetson
