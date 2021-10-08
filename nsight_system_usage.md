@@ -28,3 +28,14 @@ Start/end range:
     rng = nvtx.start_range(message=”my_message”, color=”blue”) # … do something … # 
     nvtx.end_range(rng)
  
+
+Decorate all functions of a class:
+
+import inspect
+
+    class Something:
+        def foo(self): 
+            pass
+
+    for name, fn in inspect.getmembers(Something, inspect.isfunction):
+        setattr(Something, name, decorator(fn))
