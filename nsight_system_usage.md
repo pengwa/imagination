@@ -25,13 +25,13 @@ As a context manager:
 
 Start/end range:
 
-    rng = nvtx.start_range(message=”my_message”, color=”blue”) # … do something … # 
+    rng = nvtx.start_range(message="my_message", color="blue") # … do something … # 
     nvtx.end_range(rng)
  
 
 Decorate all functions of a class:
 
-import inspect
+    import inspect
 
     class Something:
         def foo(self): 
