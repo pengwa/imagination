@@ -32,10 +32,32 @@ Start/end range:
 Decorate all functions of a class:
 
     import inspect
+    import nvtx
 
-    class Something:
-        def foo(self): 
-            pass
+    def decorator_for_func(orig_func):
+        def decorator(*args, **kwargs):
+            with nvtx.annotate(message=orig_func.__name__, color="red"):
+                # print("Decorating wrapper called for method %s" % orig_func.__name__)
+                result = orig_func(*args, **kwargs)
+                return result
+        return decorator
 
-    for name, fn in inspect.getmembers(Something, inspect.isfunction):
-        setattr(Something, name, decorator(fn))
+    def decorator_for_class(cls):
+        for name, method in inspect.getmembers(cls):
+            if (not inspect.ismethod(method) and not inspect.isfunction(method)) or inspect.isbuiltin(method):
+                continue
+            # print("Decorating function %s" % name)
+            setattr(cls, name, decorator_for_func(method))
+        return cls
+
+    # @decorator_for_class
+    # class decorated_class:
+    #      def method1(self, arg, **kwargs):
+    #          print("Method 1 called with arg %s" % arg)
+    #      def method2(self, arg):
+    #          print("Method 2 called with arg %s" % arg)
+
+
+    # d=decorated_class()
+    # d.method1(1, a=10)
+    # d.method2(2)
