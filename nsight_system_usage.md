@@ -1,6 +1,6 @@
 
 
-NSight System Usage:
+## NSight System Usage: ##
 
     /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx python ...
 
@@ -8,7 +8,7 @@ Be ntoed: when use deepspeed to run multiple process training, you need remove o
 
     /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx,osrt python ...
 
-Use NVTX:
+## Use NVTX: ##
 
 https://nvtx.readthedocs.io/en/latest/basic.html
 
