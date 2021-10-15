@@ -7,6 +7,16 @@
 Be ntoed: when use deepspeed to run multiple process training, you need remove osrt from -t, otherwise it will hang for example using this command:
 
     /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx,osrt python ...
+    
+Another sample scripts from NSightSystem web site
+    https://docs.nvidia.com/nsight-systems/UserGuide/index.html
+
+    Typical case: profile a Python script that uses CUDA
+
+        nsys profile --trace=cuda,cudnn,cublas,osrt,nvtx --delay=60 python my_dnn_script.py
+
+    Effect: Launch a Python script and start profiling it 60 seconds after the launch, tracing CUDA, cuDNN, cuBLAS, OS runtime APIs, and NVTX as well as collecting thread
+    schedule information.
 
 ## Use NVTX: ##
 
