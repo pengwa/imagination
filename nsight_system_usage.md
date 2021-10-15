@@ -8,8 +8,7 @@ Be ntoed: when use deepspeed to run multiple process training, you need remove o
 
     /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx,osrt python ...
     
-Another sample scripts from NSightSystem web site
-    https://docs.nvidia.com/nsight-systems/UserGuide/index.html
+Other sample scripts from NSightSystem web site - https://docs.nvidia.com/nsight-systems/UserGuide/index.html#example-single-command-lines
 
     Typical case: profile a Python script that uses CUDA
 
