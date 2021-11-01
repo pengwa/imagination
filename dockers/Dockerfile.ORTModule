@@ -4,7 +4,7 @@ ARG UCX_VERSION=1.8.0
 ARG OPENMPI_VERSION=4.0.4
 ARG CONDA_VERSION=4.7.10
 ARG NUMPY_VERSION=1.18.5
-ARG ONNX_VERSION=1.7.0
+ARG ONNX_VERSION=1.10.2
 ARG OPENMPI_PATH=/opt/openmpi-${OPENMPI_VERSION}
 
 # install curl, git, ssh (required by MPI when running ORT tests)
@@ -15,7 +15,9 @@ RUN apt-get -y update &&\
         language-pack-en \
         openssh-client \
         unattended-upgrades \
-        vim gdb clang-format htop libz-dev &&\
+        vim gdb clang-format htop libz-dev \
+	libjpeg-dev zlib1g-dev \
+	nsight-systems && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /stage
@@ -32,7 +34,8 @@ RUN pip install --no-cache-dir \
         cmake \
         numpy==${NUMPY_VERSION} \
         onnx=="${ONNX_VERSION}" cerberus \
-        pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas sympy pyyaml
+        pytest deepspeed h5py boto3 requests git+https://github.com/NVIDIA/dllogger.git wget pandas sympy pyyaml \
+	nvtx
 
 # build ucx suite
 # note: openmpi will not select ucx without multithreading enabled
@@ -87,7 +90,7 @@ RUN cd /stage && curl -fSsL https://www.mellanox.com/downloads/ofed/MLNX_OFED-${
     cd MLNX_OFED_LINUX-${MOFED_VERSION}-${MOFED_OS}-x86_64 && apt-get update && apt-get -y install udev libcap2 && ./mlnxofedinstall --force --user-space-only --without-fw-update  &&\
     rm /stage/* -rf
 
-#RUN pip install --no-cache-dir --pre torch torchvision torchaudio -f https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html
+RUN pip install --no-cache-dir --pre torch torchvision torchaudio -f https://download.pytorch.org/whl/nightly/cu111/torch_nightly.html
 
 # Install AzureML support and commonly used packages.
 #RUN pip install azureml-defaults sentencepiece==0.1.92 transformers==4.3.3 msgpack==1.0.0 tensorboardX==1.8 tensorboard==2.3.0 &&\
