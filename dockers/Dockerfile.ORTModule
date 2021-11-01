@@ -17,7 +17,7 @@ RUN apt-get -y update &&\
         unattended-upgrades \
         vim gdb clang-format htop libz-dev \
 	libjpeg-dev zlib1g-dev \
-	nsight-systems && \
+	nsight-systems-2021.2.4 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /stage
