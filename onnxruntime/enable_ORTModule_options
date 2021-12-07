@@ -1,0 +1,10 @@
+Configure ORTModule external options. Configurable options include
+a.	Saving exported and optimized onnx models
+b.	Configuring the ORTModule log level.
+Example:
+
+from torch_ort import ORTModule, DebugOptions, LogLevel
+
+# Instantiate ORTModule with DebugOptions.
+model = ORTModule(pt_model, debug_options=DebugOptions(log_level=LogLevel.INFO,
+                                                       save_onnx=True, onnx_prefix='my_model'))
