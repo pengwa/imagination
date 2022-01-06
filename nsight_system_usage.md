@@ -1,3 +1,6 @@
+Install
+
+sudo apt-get install -y nsight-systems-2021.2.4
 
 
 ## NSight System Usage: ##
