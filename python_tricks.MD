@@ -11,13 +11,13 @@ Print callstack https://stackoverflow.com/questions/1156023/print-current-call-s
 
     f()
 
-# Prints:
-# File "so-stack.py", line 10, in <module>
-#     f()
-# File "so-stack.py", line 4, in f
-#     g()
-# File "so-stack.py", line 7, in g
-#     for line in traceback.format_stack():
+    # Prints:
+    # File "so-stack.py", line 10, in <module>
+    #     f()
+    # File "so-stack.py", line 4, in f
+    #     g()
+    # File "so-stack.py", line 7, in g
+    #     for line in traceback.format_stack():
 If you really only want to print the stack to stderr, you can use:
 
         traceback.print_stack()
