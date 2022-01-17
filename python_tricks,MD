@@ -1,0 +1,26 @@
+Print callstack https://stackoverflow.com/questions/1156023/print-current-call-stack-from-a-method-in-python-code
+    
+    import traceback
+
+    def f():
+        g()
+
+    def g():
+        for line in traceback.format_stack():
+            print(line.strip())
+
+    f()
+
+# Prints:
+# File "so-stack.py", line 10, in <module>
+#     f()
+# File "so-stack.py", line 4, in f
+#     g()
+# File "so-stack.py", line 7, in g
+#     for line in traceback.format_stack():
+If you really only want to print the stack to stderr, you can use:
+
+    traceback.print_stack()
+Or to print to stdout (useful if want to keep redirected output together), use:
+
+    traceback.print_stack(file=sys.stdout)
