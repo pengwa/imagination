@@ -1,8 +1,8 @@
-ignore_git_permission:
+### ignore_git_permission:
 
-  git config core.fileMode false
+    git config core.fileMode false
 
 
-reset submodules recursively:
+### reset submodules recursively:
 
-  git submodule foreach --recursive git reset --hard
+    git submodule foreach --recursive git reset --hard
