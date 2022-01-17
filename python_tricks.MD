@@ -20,7 +20,8 @@ Print callstack https://stackoverflow.com/questions/1156023/print-current-call-s
 #     for line in traceback.format_stack():
 If you really only want to print the stack to stderr, you can use:
 
-    traceback.print_stack()
+        traceback.print_stack()
+    
 Or to print to stdout (useful if want to keep redirected output together), use:
 
-    traceback.print_stack(file=sys.stdout)
+        traceback.print_stack(file=sys.stdout)
