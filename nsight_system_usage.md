@@ -1,6 +1,10 @@
 Install
 
-sudo apt-get install -y nsight-systems-2021.2.4
+    sudo apt-get install -y nsight-systems-2021.2.4
+
+Search latest Nsight package in apt.
+
+    apt-cache search nsight-systems*
 
 
 ## NSight System Usage: ##
