@@ -15,4 +15,9 @@ mpi_entry.sh
         #!/bin/bash
         nsys profile -o multi_gpu_profile_$OMPI_COMM_WORLD_RANK_%p -t cuda,nvtx python3 -m torch.distributed.launch --nproc_per_node=8 --nnode=$OMPI_COMM_WORLD_SIZE --node_rank=$OMPI_COMM_WORLD_RANK --master_addr=$MASTER_IP --master_port=$MASTER_PORT cuda_bpr.py
 
+/job/hostfile
+
+    worker-0 slots=8
+    worker-1 slots=8
+
 mpirun -npernode 1 -hostfile /job/hostfile bash mpirun_entry.sh
