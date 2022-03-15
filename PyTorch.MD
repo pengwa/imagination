@@ -20,4 +20,4 @@ mpi_entry.sh
     worker-0 slots=8
     worker-1 slots=8
 
-mpirun -npernode 1 -hostfile /job/hostfile bash mpirun_entry.sh
+mpirun -npernode 1 -hostfile /job/hostfile -x NCCL_SOCKET_IFNAME=eth0 -x NCCL_DEBUG=INFO -x MASTER_IP -x MASTER_PORT bash mpirun_entry.sh
