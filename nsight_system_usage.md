@@ -1,19 +1,19 @@
-Install
-
-    sudo apt-get install -y nsight-systems-2021.2.4
 
 Search latest Nsight package in apt.
 
     apt-cache search nsight-systems*
 
+Install
+
+    sudo apt-get install -y nsight-systems-<postfix>
 
 ## NSight System Usage: ##
 
-    /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx python ...
+    nsys profile -o 24layers_%p_ort -t cuda,nvtx python ...
 
 Be ntoed: when use deepspeed to run multiple process training, you need remove osrt from -t, otherwise it will hang for example using this command:
 
-    /opt/nvidia/nsight-systems/2021.2.1/bin/nsys profile -o 24layers_%p_ort -t cuda,nvtx,osrt python ...
+    nsys profile -o 24layers_%p_ort -t cuda,nvtx,osrt python ...
     
 Other sample scripts from NSightSystem web site - https://docs.nvidia.com/nsight-systems/UserGuide/index.html#example-single-command-lines
 
