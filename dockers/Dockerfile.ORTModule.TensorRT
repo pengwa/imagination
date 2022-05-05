@@ -1,0 +1,39 @@
+# --------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------
+# Dockerfile to run ONNXRuntime with TensorRT integration
+
+# nVidia TensorRT Base Image
+ARG TRT_CONTAINER_VERSION=22.03
+FROM nvcr.io/nvidia/tensorrt:${TRT_CONTAINER_VERSION}-py3
+
+ARG ONNXRUNTIME_REPO=https://github.com/Microsoft/onnxruntime
+ARG ONNXRUNTIME_BRANCH=master
+ARG CMAKE_CUDA_ARCHITECTURES=37;50;52;60;61;70;75;80
+
+RUN apt-get update &&\
+    apt-get install -y sudo git bash unattended-upgrades
+RUN unattended-upgrade
+
+WORKDIR /code
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:/code/cmake-3.21.0-linux-x86_64/bin:/opt/miniconda/bin:${PATH}
+
+RUN git clone --single-branch --branch pengwa/fp16_output_for_split_embedding --recursive https://github.com/pengwa/FBGEMM.git &&\
+    cd FBGEMM && git submodule sync && git submodule update --init --recursive &&\
+    mkdir build && cd build && cmake .. && make &&\
+    cd FBGEMM/fbgemm_gpu && git submodule sync && git submodule update --init --recursive &&\
+    python setup.py install -DTORCH_CUDA_ARCH_LIST="7.0;8.0"
+
+RUN git clone --single-branch --branch pengwa/cf --recursive https://github.com/pengwa/torchrec &&\
+    cd torchrec && python setup.py install develop --skip_fbgemm --fbgemm_gpu_dir /code/FBGEMM/fbgemm_gpu
+
+# Prepare onnxruntime repository & build onnxruntime with TensorRT
+RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
+    /bin/sh onnxruntime/dockerfiles/scripts/install_common_deps.sh &&\
+    trt_version=${TRT_VERSION:0:3} &&\
+    /bin/sh onnxruntime/dockerfiles/scripts/checkout_submodules.sh ${trt_version} &&\
+    cd onnxruntime &&\
+    /bin/sh build.sh --parallel --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
+    pip install /code/onnxruntime/build/Linux/Release/dist/*.whl &&\
+    cd ..
