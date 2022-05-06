@@ -29,7 +29,7 @@ RUN cd /code/FBGEMM/fbgemm_gpu && git submodule sync && git submodule update --i
 
 # error: docstring-parser 0.14.1 is installed but docstring-parser==0.8.1 is required by {'torchx-nightly'}
 RUN pip install docstring-parser==0.8.1
-RUN git clone --single-branch --branch pengwa/cf --recursive https://github.com/pengwa/torchrec &&\
+RUN git clone --single-branch --branch pengwa/cf_train --recursive https://github.com/pengwa/torchrec &&\
     cd torchrec && python setup.py install develop --skip_fbgemm --fbgemm_gpu_dir /code/FBGEMM/fbgemm_gpu
 
 # Dependencies: cmake
@@ -41,8 +41,8 @@ ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:/code/cmake-3.21.0-linux-x86_
 # Prepare onnxruntime repository & build onnxruntime with TensorRT
 RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
     cd onnxruntime &&\
-    /bin/sh build.sh --parallel --enable_training --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
+    /bin/sh build.sh --parallel --enable_training --use_cuda --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
     pip install /code/onnxruntime/build/Linux/Release/dist/*.whl &&\
     cd ..
 
-RUN cd /tmp/ && pip install torch_ort && python -m onnxruntime.training.ortmodule.torch_cpp_extensions.install
+RUN cd /tmp/ && pip install nvtx torch_ort faiss-cpu==1.7.1 hnswlib==0.4.0 mlflow==1.13.1  && python -m onnxruntime.training.ortmodule.torch_cpp_extensions.install
