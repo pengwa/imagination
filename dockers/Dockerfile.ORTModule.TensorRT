@@ -38,11 +38,13 @@ RUN wget --quiet https://github.com/Kitware/CMake/releases/download/v3.21.0/cmak
 
 ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:/code/cmake-3.21.0-linux-x86_64/bin:${PATH}
 
+RUN rm /code/onnxruntime -rf
+
 # Prepare onnxruntime repository & build onnxruntime with TensorRT
-RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
-    cd onnxruntime &&\
-    /bin/sh build.sh --parallel --enable_training --use_cuda --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
+RUN git clone --single-branch --branch pengwa/trt_training --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
+    cd onnxruntime && rm build -rf && pip uninstall onnxruntime_training onnxruntime_training_gpu --yes && rm -rf /usr/local/lib/python3.8/dist-packages/onnxruntime &&\
+    /bin/sh build.sh --parallel --enable_training --cuda_version=11.6 --use_cuda --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
     pip install /code/onnxruntime/build/Linux/Release/dist/*.whl &&\
     cd ..
 
-RUN cd /tmp/ && pip install nvtx torch_ort faiss-cpu==1.7.1 hnswlib==0.4.0 mlflow==1.13.1  && python -m onnxruntime.training.ortmodule.torch_cpp_extensions.install
+RUN cd /tmp/ && pip install nvtx torch_ort faiss-cpu==1.7.1 mlflow==1.13.1  && export TORCH_CUDA_ARCH_LIST="7.0;8.0" && python -m onnxruntime.training.ortmodule.torch_cpp_extensions.install
