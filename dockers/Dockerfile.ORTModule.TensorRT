@@ -16,7 +16,8 @@ RUN pip install pyyaml typing_extensions
 RUN git clone --single-branch --branch v1.11.0  --recursive https://github.com/pytorch/pytorch &&\
     cd pytorch && RELEASE=1 python setup.py install
 
-RUN git clone --single-branch --branch pengwa/cuda_116 --recursive https://github.com/pengwa/FBGEMM.git &&\
+# Build FBGEMM from scource
+RUN ls && git clone --single-branch --branch pengwa/cuda_116 --recursive https://github.com/pengwa/FBGEMM.git &&\
     cd FBGEMM && git submodule sync && git submodule update --init --recursive &&\
     mkdir build && cd build && cmake .. && make
 
@@ -26,6 +27,8 @@ ENV CUDACXX=/usr/local/cuda/bin/nvcc
 RUN cd /code/FBGEMM/fbgemm_gpu && git submodule sync && git submodule update --init --recursive &&\
     python setup.py install -DTORCH_CUDA_ARCH_LIST="7.0;8.0"
 
+# error: docstring-parser 0.14.1 is installed but docstring-parser==0.8.1 is required by {'torchx-nightly'}
+RUN pip install docstring-parser==0.8.1
 RUN git clone --single-branch --branch pengwa/cf --recursive https://github.com/pengwa/torchrec &&\
     cd torchrec && python setup.py install develop --skip_fbgemm --fbgemm_gpu_dir /code/FBGEMM/fbgemm_gpu
 
@@ -33,9 +36,13 @@ RUN git clone --single-branch --branch pengwa/cf --recursive https://github.com/
 RUN wget --quiet https://github.com/Kitware/CMake/releases/download/v3.21.0/cmake-3.21.0-linux-x86_64.tar.gz &&\
     tar zxf cmake-3.21.0-linux-x86_64.tar.gz && rm -rf cmake-3.21.0-linux-x86_64.tar.gz
 
+ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:/code/cmake-3.21.0-linux-x86_64/bin:${PATH}
+
 # Prepare onnxruntime repository & build onnxruntime with TensorRT
 RUN git clone --single-branch --branch ${ONNXRUNTIME_BRANCH} --recursive ${ONNXRUNTIME_REPO} onnxruntime &&\
     cd onnxruntime &&\
-    /bin/sh build.sh --parallel --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
+    /bin/sh build.sh --parallel --enable_training --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_tensorrt --tensorrt_home /usr/lib/x86_64-linux-gnu/ --config Release --build_wheel --enable_training_torch_interop --skip_tests --skip_submodule_sync --cmake_extra_defines '"CMAKE_CUDA_ARCHITECTURES='${CMAKE_CUDA_ARCHITECTURES}'"' &&\
     pip install /code/onnxruntime/build/Linux/Release/dist/*.whl &&\
     cd ..
+
+RUN cd /tmp/ && pip install torch_ort && python -m onnxruntime.training.ortmodule.torch_cpp_extensions.install
