@@ -1,1 +1,4 @@
 ./onnxruntime_training_api_test_runner --model_training_graph_path /bert_ort/pengwa/adhoc/onnxruntime/test/testdata/training_api/gradient_graph.onnx --optimizer_training_graph_path /bert_ort/pengwa/adhoc/onnxruntime/test/testdata/training_api/adamw.onnx --checkpoint_to_load_path /bert_ort/pengwa/adhoc/onnxruntime/test/testdata/training_api/checkpoint.ckpt --output_dir /tmp/ --train_batch_size 1 --eval_batch_size 1 --num_train_epochs 1 --eval_interval 1000 checkpoint_interval 2000
+
+
+./onnxruntime_training_api_test_runner --model_training_graph_path /bert_ort/pengwa/cls/model_with_mseloss.onnx --optimizer_training_graph_path /bert_ort/pengwa/cls/optimizer_adamw.onnx --checkpoint_to_load_path /bert_ort/pengwa/cls/checkpoint --output_dir /tmp/ --train_batch_size 1 --eval_batch_size 1 --num_train_epochs 10 --eval_interval 1000 checkpoint_interval 2000
