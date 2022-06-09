@@ -24,6 +24,10 @@ Other sample scripts from NSightSystem web site - https://docs.nvidia.com/nsight
     Effect: Launch a Python script and start profiling it 60 seconds after the launch, tracing CUDA, cuDNN, cuBLAS, OS runtime APIs, and NVTX as well as collecting thread
     schedule information.
 
+Memory
+
+    profile -s cpu -b fp --cudabacktrace all --cuda-memory-usage true --stats false bash pen
+
 ## Use NVTX: ##
 
 https://nvtx.readthedocs.io/en/latest/basic.html
