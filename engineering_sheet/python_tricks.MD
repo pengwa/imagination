@@ -27,6 +27,12 @@ Or to print to stdout (useful if want to keep redirected output together), use:
         traceback.print_stack(file=sys.stdout)
 
 
+Inspect Callstack:
+
+sudo env "PATH=$PATH" py-spy dump --pid 34754
+
+
+
 Ignore Local Python Site-Package:
     
     user_name@51b86f944ce14a90b1c3aa0798c41135-master-0:pip show python_lib_name
