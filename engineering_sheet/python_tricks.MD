@@ -29,7 +29,7 @@ Or to print to stdout (useful if want to keep redirected output together), use:
 
 Inspect Callstack:
 
-sudo env "PATH=$PATH" py-spy dump --pid 34754
+    sudo env "PATH=$PATH" py-spy dump --pid 34754
 
 
 
