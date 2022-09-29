@@ -2,11 +2,7 @@
 file=$1
 step=$2
 
-grep '"name":"Summary"' $file > /tmp/$file"_summary.log"
-
-grep '"ph":"X","pid":${step},' /tmp/$file"_summary.log" > /tmp/$file"_summary_step_${step}.log"
-
-cat /tmp/$file"_summary_step_${step}.log" | sort -V > /tmp/$file"_summary_step_${step}_sorted.log"
+grep '"name":"Summary"' $file | grep '"ph":"X","pid":${step},' | sort -V > /tmp/$file"_summary_step_${step}_sorted.log"
 
 python get_peak.py --path /tmp/$file"_summary_step_${step}_sorted.log"
 
