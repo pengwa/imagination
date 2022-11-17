@@ -2,6 +2,10 @@
 
     git config core.fileMode false
 
+### add safe directory
+
+git config --global --add safe.directory '*'
+
 
 ### reset submodules recursively:
 
