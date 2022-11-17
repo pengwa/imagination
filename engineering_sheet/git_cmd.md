@@ -4,7 +4,7 @@
 
 ### add safe directory
 
-git config --global --add safe.directory '*'
+    git config --global --add safe.directory '*'
 
 
 ### reset submodules recursively:
