@@ -67,3 +67,18 @@ Ignore Local Python Site-Package:
     Requires:
     Required-by:
     user_name@51b86f944ce14a90b1c3aa0798c41135-master-0:/work/code$
+
+
+
+The FunctionType constructor is used to make a deep copy of a function. (http://stackoverflow.com/a/6528148/190597)
+
+    import types
+    def copy_func(f, name=None):
+        return types.FunctionType(f.func_code, f.func_globals, name or f.func_name,
+            f.func_defaults, f.func_closure)
+    
+    def A():
+        """A"""
+        pass
+    B = copy_func(A, "B")
+    B.__doc__ = """B"""
