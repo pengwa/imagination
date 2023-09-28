@@ -1,5 +1,5 @@
 
-dir_of_ort=/bert_ort/pengwa/on_device
+dir_of_ort=/tmp/onnxruntime
 flavor=RelWithDebInfo
 echo -e "update ort package"
 build_path=$dir_of_ort/build/Linux/$flavor
@@ -16,3 +16,8 @@ do
 done
 
 echo -e "\033[0;31m update ORT by softlink done \033[0m"
+
+
+cp orttraining/orttraining/python/training/utils/* $wheel_path/onnxruntime/training/utils/ -r
+cp orttraining/orttraining/python/training/ortmodule/* $wheel_path/onnxruntime/training/ortmodule/
+cp onnxruntime/python/tools/symbolic_shape_infer.py $wheel_path/onnxruntime/tools/symbolic_shape_infer.py
