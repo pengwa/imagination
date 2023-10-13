@@ -17,7 +17,7 @@ done
 
 echo -e "\033[0;31m update ORT by softlink done \033[0m"
 
-
+cd $dir_of_ort
 cp orttraining/orttraining/python/training/utils/* $wheel_path/onnxruntime/training/utils/ -r
 cp orttraining/orttraining/python/training/ortmodule/* $wheel_path/onnxruntime/training/ortmodule/
 cp onnxruntime/python/tools/symbolic_shape_infer.py $wheel_path/onnxruntime/tools/symbolic_shape_infer.py
