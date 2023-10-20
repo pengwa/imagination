@@ -1,7 +1,7 @@
 export CUDA_HOME=/usr/local/cuda-11.8
 export CUDNN_HOME=/usr/local/cuda-11.8
 export CUDACXX=$CUDA_HOME/bin/nvcc
-dir_of_ort=/tmp/onnxruntime
+dir_of_ort=`pwd`
 export PATH=/opt/openmpi-4.0.4/bin:$PATH
 export LD_LIBRARY_PATH=/opt/openmpi-4.0.4/lib:$LD_LIBRARY_PATH
 export MPI_CXX_INCLUDE_DIRS=/opt/openmpi-4.0.4/include
