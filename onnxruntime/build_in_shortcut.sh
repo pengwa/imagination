@@ -1,5 +1,5 @@
 
-dir_of_ort=/tmp/onnxruntime
+dir_of_ort=`pwd`
 flavor=RelWithDebInfo
 echo -e "update ort package"
 build_path=$dir_of_ort/build/Linux/$flavor
