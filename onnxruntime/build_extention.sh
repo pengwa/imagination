@@ -1,7 +1,10 @@
 wheel_path=`pip show onnxruntime-training | grep -i location | cut  -d" " -f2`
 
 #rm $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions -rf
-cp orttraining/orttraining/python/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/torch_interop_utils.cc $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/torch_interop_utils.cc -rf
+rm $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/*.h
+rm $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/*.cc
+rm $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/*.py
+cp orttraining/orttraining/python/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/* $wheel_path/onnxruntime/training/ortmodule/torch_cpp_extensions/cpu/torch_interop_utils/ -rf
 
 cur=`pwd`
 cd /tmp/
