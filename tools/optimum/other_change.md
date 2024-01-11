@@ -62,3 +62,52 @@ class DisentangledSelfAttention(nn.Module):
 
 
 ```
+
+For orttraining/orttraining/python/training/utils/hooks/_statistics_subscriber.py
+
+def _summarize_activations(...
+
++    from onnxruntime.training.utils.hooks._subscriber_manager import ORT_NO_INCREASE_GLOBAL_STEP
+
++    if ORT_NO_INCREASE_GLOBAL_STEP[0] is True:
++        return tensor
+
+    display_name = name + " forward run" if is_forward is True else name + " backward run"
+    output_file_name = name + "_forward" if is_forward is True else name + "_backward"
+
+    if tensor is None or not isinstance(tensor, torch.Tensor):
+        print(f"{display_name} not a torch tensor, value: {tensor}")
+        return tensor
+
+    step_path = Path(step_folder)
+    if not step_path.exists():
+        step_path.mkdir(parents=True, exist_ok=False)
+    order_file_path = step_path / "order.txt"
+    tensor_file_path = step_path / output_file_name
+
+    with order_file_path.open(mode="a", encoding="utf-8") as f:
+        f.write(f"{output_file_name}\n")
+
+    with tensor_file_path.open(mode="w", encoding="utf-8") as f:
+        # If indices is given, we flatten the first two dims of tensor, and slice the tensor with indices.
+        # Otherwise, we reuse the original tensor.
+        tensor_to_analyze = tensor.flatten(start_dim=0, end_dim=1)[indices, ...] if indices is not None else tensor
+        _summarize_tensor(display_name, tensor_to_analyze, f, depth, self._run_on_cpu, self._bucket_size, indices, step, module)
+
++    if 'hidden_states_' in display_name or 'qp_' in display_name:
++        if indices is not None:
++            tensor_shape = tensor.shape
++            new_t = tensor.view(-1, tensor_shape[2])
+
++            mask = torch.ones_like(new_t)
++            mask[indices] = torch.zeros_like(new_t[indices])
+
++            all_zeros = torch.zeros_like(new_t)
+
++            new_t = torch.where(mask == 1, all_zeros, new_t)
++            n = new_t.view(tensor_shape)
++            return n
++         else:
++             return tensor
++    else:
++        return tensor
