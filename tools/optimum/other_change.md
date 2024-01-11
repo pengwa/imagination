@@ -1,6 +1,5 @@
 For optimum/onnxruntime/trainer.py
 
-
 Change from 
 
 ```
@@ -34,5 +33,32 @@ to
     GlobalSubscriberManager.subscribe(
         model, [StatisticsSubscriber(output_dir=debug_foutputs + f"/{prefix}_run_" + str(torch.distributed.get_rank()), override_output_dir=True)]
     )
+
+```
+
+
+For models/deberta/modeling_deberta.py
+
+Add
+
+```diff
+
+from onnxruntime.training.utils.hooks import inspect_activation
+
+class DisentangledSelfAttention(nn.Module):
++    def __init__(self, config, index):
+-    def __init__(self, config):
++         self.index = index
+    ...
+    def forward(...
+        hidden_states = inspect_activation(f"hidden_states_{self.index}", hidden_states)
+        if query_states is None:
+            qp = self.in_proj(hidden_states)  # .split(self.all_head_size, dim=-1)
+            qp = inspect_activation(f"qp_{self.index}", qp)
+            query_layer, key_layer, value_layer = self.transpose_for_scores(qp).chunk(3, dim=-1)
+            query_layer = inspect_activation(f"query_layer3_{self.index}", query_layer)
+            key_layer = inspect_activation(f"key_layer3_{self.index}", key_layer)
+            value_layer = inspect_activation(f"value_layer3_{self.index}", value_layer)
+
 
 ```
