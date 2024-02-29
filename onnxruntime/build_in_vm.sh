@@ -1,5 +1,5 @@
-export CUDA_HOME=/usr/local/cuda-11.8
-export CUDNN_HOME=/usr/local/cuda-11.8
+export CUDA_HOME=/usr/local/cuda-12.1
+export CUDNN_HOME=/usr/local/cuda-12.1
 export CUDACXX=$CUDA_HOME/bin/nvcc
 dir_of_ort=`pwd`
 export PATH=/opt/openmpi-4.0.4/bin:$PATH
@@ -18,7 +18,7 @@ flavor=RelWithDebInfo
 rm -rf $dir_of_ort/build/Linux/$flavor/dist/*.whl
 
 
-./build.sh --config $flavor --use_cuda --build_wheel --parallel 8 --enable_training --skip_tests --cuda_version=11.8 --cmake_extra_defines CMAKE_CUDA_ARCHITECTURES="60;70;75;80;86"
+./build.sh --config $flavor --use_cuda --build_wheel --parallel 8 --enable_training --skip_tests --cuda_version=12.1 --cmake_extra_defines CMAKE_CUDA_ARCHITECTURES="60;70;75;80;86"
 
 pip install $dir_of_ort/build/Linux/$flavor/dist/*.whl
 
