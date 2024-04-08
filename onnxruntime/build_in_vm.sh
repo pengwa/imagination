@@ -18,7 +18,7 @@ flavor=RelWithDebInfo
 rm -rf $dir_of_ort/build/Linux/$flavor/dist/*.whl
 
 
-./build.sh --config $flavor --use_cuda --build_wheel --parallel 8 --enable_training --skip_tests --cuda_version=12.1 --cmake_extra_defines CMAKE_CUDA_ARCHITECTURES="60;70;75;80;86"
+./build.sh --config $flavor --use_cuda --build_wheel --parallel 8 --enable_training --skip_tests --cuda_version=12.1 --allow_running_as_root --cmake_extra_defines CMAKE_CUDA_ARCHITECTURES="60;70;75;80;86"
 
 pip install $dir_of_ort/build/Linux/$flavor/dist/*.whl
 
