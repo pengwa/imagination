@@ -1,3 +1,6 @@
+
+git config --global --add safe.directory '*'
+chmod 777 . -R
 export CUDA_HOME=/usr/local/cuda-12.1
 export CUDNN_HOME=/usr/local/cuda-12.1
 export CUDACXX=$CUDA_HOME/bin/nvcc
