@@ -12,3 +12,4 @@ elif [[ $(docker ps -a -f "name=$name" -f "status=running" --format '{{.Names}}'
 else
     echo "Starting container named $name"
     sudo docker run --restart always  --gpus all -v /home/pengwa/containers:/containers --net=host --shm-size=256g --ulimit memlock=-1 --ulimit stack=67108864 --name $name -it ptebic.azurecr.io/public/aifx/acpt/stable-ubuntu2004-cu121-py38-torch221 /bin/bash
+fi
