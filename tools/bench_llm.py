@@ -100,13 +100,18 @@ Current time: {current_time}.
 
 import ollama
 
-
 llm_proxy = LLMServiceProxy()
 model_name = Model.PHI3_MEDIUM
 model_name = Model.GPT_4O
 model_name = "ollama:phi3:mini"
 model_name = "ollama:phi3:medium"
-model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_1"
+# model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_1"
+# model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_0"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_0"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_1"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q8_0"
 
 current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
