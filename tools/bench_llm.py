@@ -103,12 +103,14 @@ import ollama
 llm_proxy = LLMServiceProxy()
 model_name = Model.PHI3_MEDIUM
 model_name = Model.GPT_4O
+
+# Refer to https://ollama.com/library/phi3/tags for phi3 series.
 model_name = "ollama:phi3:mini"
 model_name = "ollama:phi3:medium"
 # model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_1"
 # model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_0"
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_0"
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_1"
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_0" # 2.2GB 
+model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_1" # 2.4GB
 model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S"
 model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M"
 model_name = "ollama:phi3:3.8b-mini-4k-instruct-q8_0"
