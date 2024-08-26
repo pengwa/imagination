@@ -139,7 +139,7 @@ if "ollama:" in model_name:
         messages=[
             {
                 "role": "system",
-                "content": p,
+                "content": "",
             },
             {
                 "role": "user",
