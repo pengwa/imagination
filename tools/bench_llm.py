@@ -101,140 +101,146 @@ Current time: {current_time}.
 import ollama
 
 llm_proxy = LLMServiceProxy()
-model_name = Model.PHI3_MEDIUM
-model_name = Model.GPT_4O
 
-# Refer to https://ollama.com/library/phi3/tags for phi3 series.
-model_name = "ollama:phi3:mini"
-model_name = "ollama:phi3:medium"
-# model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_1"
-# model_name = "ollama:phi3:3.8b-mini-128k-instruct-q4_0"
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_0" # 2.2GB 
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_1" # 2.4GB
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S"
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M"
-model_name = "ollama:phi3:3.8b-mini-4k-instruct-q8_0"
+for model_name in [
+                # Model.PHI3_MEDIUM, 
+                #    Model.GPT_4O, 
+                   # Refer to https://ollama.com/library/phi3/tags for phi3 series.
+                #    "ollama:phi3:mini", "ollama:phi3:medium",
+                   "ollama:phi3:3.8b-mini-4k-instruct-q4_0", # 2.2GB
+                   "ollama:phi3:3.8b-mini-4k-instruct-q4_1", # 2.4GB
+                #    "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S",
+                #    "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M",
+                   "ollama:phi3:3.8b-mini-4k-instruct-q8_0",
+                   #"ollama:phi3:3.8b-mini-128k-instruct-q4_0",
+                   #"ollama:phi3:3.8b-mini-128k-instruct-q4_1",
+                   ]:
+    print(">>" * 100)
+    print(f"model_name: {model_name}")
 
-current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-p = EXTENDED_QUERIES_PROMPT1.format(current_time=current_time)
-print("wrapping up: len of system prompt: ", len(p))
-chat_complete_kwargs = {
-    "messages": [
-        {
-            "role": "system",
-            "content": p,
-        },
-        {
-            "role": "user",
-            "content": user_prompt,
-        },
-    ],
-    "max_tokens": 1024,
-    "temperature": 0.5,
-}
-
-client = Client(host="http://localhost:11434")
-if "ollama:" in model_name:
-    response = client.chat(
-        model=model_name.replace("ollama:", ""),
-        messages=[
+    p = EXTENDED_QUERIES_PROMPT1.format(current_time=current_time)
+    print("wrapping up: len of system prompt: ", len(p))
+    chat_complete_kwargs = {
+        "messages": [
             {
                 "role": "system",
-                "content": "",
+                "content": p,
             },
             {
                 "role": "user",
-                "content": (p + "\n" + user_prompt if "phi3" in model_name else user_prompt),
+                "content": user_prompt,
             },
         ],
-    )
-else:
-    llm_response, response_iterator = llm_proxy.chat_completions_create(
-        model_name=model_name, **chat_complete_kwargs
-    )
+        "max_tokens": 1024,
+        "temperature": 0.5,
+    }
+
+    client = Client(host="http://localhost:11434")
+    if "ollama:" in model_name:
+        response = client.chat(
+            model=model_name.replace("ollama:", ""),
+            messages=[
+                {
+                    "role": "system",
+                    "content": "",
+                },
+                {
+                    "role": "user",
+                    "content": (p + "\n" + user_prompt if "phi3" in model_name else user_prompt),
+                },
+            ],
+        )
+    else:
+        llm_response, response_iterator = llm_proxy.chat_completions_create(
+            model_name=model_name, **chat_complete_kwargs
+        )
 
 
-for j in range(5):
-    t_scope_start = time.time()
-    collected_times = []
-    for i in range(20):
-        if j == 0:
-            p = EXTENDED_QUERIES_PROMPT1.format(current_time=current_time)
-        elif j == 1:
-            p = EXTENDED_QUERIES_PROMPT2.format(current_time=current_time)
-        elif j == 2:
-            p = EXTENDED_QUERIES_PROMPT3.format(current_time=current_time)
-        elif j == 3:
-            p = EXTENDED_QUERIES_PROMPT4.format(current_time=current_time)
-        else:
-            p = EXTENDED_QUERIES_PROMPT5.format(current_time=current_time)
-        # time.sleep(20)
-        t_start = time.time()
-        try:
+    # for j in range(5):
+    for j in range(1):
+        t_scope_start = time.time()
+        collected_times = []
+        for i in range(20):
+            if j == 0:
+                p = EXTENDED_QUERIES_PROMPT1.format(current_time=current_time)
+            elif j == 1:
+                p = EXTENDED_QUERIES_PROMPT2.format(current_time=current_time)
+            elif j == 2:
+                p = EXTENDED_QUERIES_PROMPT3.format(current_time=current_time)
+            elif j == 3:
+                p = EXTENDED_QUERIES_PROMPT4.format(current_time=current_time)
+            else:
+                p = EXTENDED_QUERIES_PROMPT5.format(current_time=current_time)
+            # time.sleep(20)
+            t_start = time.time()
+            try:
 
-            # print("len of system prompt: ", len(p))
-            chat_complete_kwargs = {
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": p,
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-                ],
-                "max_tokens": 1024,
-                "temperature": 0.5,
-            }
-            t_end = None
-
-            if "ollama:" in model_name:
-                response = client.chat(
-                    model=model_name.replace("ollama:", ""),
-                    messages=[
+                # print("len of system prompt: ", len(p))
+                chat_complete_kwargs = {
+                    "messages": [
                         {
                             "role": "system",
                             "content": p,
                         },
                         {
                             "role": "user",
-                            "content": (
-                                p + "\n" + user_prompt
-                                if "phi3" in model_name
-                                else user_prompt
-                            ),
+                            "content": user_prompt,
                         },
                     ],
-                )
-            else:
-                llm_response, response_iterator = llm_proxy.chat_completions_create(
-                    model_name=model_name, **chat_complete_kwargs
-                )
+                    "max_tokens": 1024,
+                    "temperature": 0.5,
+                }
+                t_end = None
 
-                for q in response_iterator(llm_response):
+                if "ollama:" in model_name:
+                    response = client.chat(
+                        model=model_name.replace("ollama:", ""),
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": p,
+                            },
+                            {
+                                "role": "user",
+                                "content": (
+                                    p + "\n" + user_prompt
+                                    if "phi3" in model_name
+                                    else user_prompt
+                                ),
+                            },
+                        ],
+                    )
+                else:
+                    llm_response, response_iterator = llm_proxy.chat_completions_create(
+                        model_name=model_name, **chat_complete_kwargs
+                    )
+
+                    for q in response_iterator(llm_response):
+                        t_end = time.time()
+                        break
+
+                if t_end is None:
                     t_end = time.time()
-                    break
 
-            if t_end is None:
-                t_end = time.time()
+                # print(f"Time taken: {t_end - t_start} seconds, >>>> ")
+                collected_times.append(t_end - t_start)
 
-            # print(f"Time taken: {t_end - t_start} seconds, >>>> ")
-            collected_times.append(t_end - t_start)
+                # Replace double quotes with single quotes in the query to avoid exact search.
+                # queries = [
+                #     q.replace('"', "'").strip()
+                #     for q in response_iterator(llm_response)
+                # ]
 
-            # Replace double quotes with single quotes in the query to avoid exact search.
-            # queries = [
-            #     q.replace('"', "'").strip()
-            #     for q in response_iterator(llm_response)
-            # ]
-
-            # return [q for q in queries if q]
-        except Exception as e:
-            print(f"rewrite llm encountered error: {e}\n{traceback.format_exc()}")
-            # return [query]
-    t_scope_end = time.time()
-    print(
-        f"L{len(p)}: average: {(t_scope_end-t_scope_start)/len(collected_times)} \nTime taken for scope {j}: {t_scope_end - t_scope_start} seconds, >>>>  length: {len(p)}, , std: {np.std(collected_times)},"
-        f"max: {max(collected_times)}, min: {min(collected_times)}, collected_times: {collected_times}, \nhist: {np.histogram(collected_times)}"
-    )
+                # return [q for q in queries if q]
+            except Exception as e:
+                print(f"rewrite llm encountered error: {e}\n{traceback.format_exc()}")
+                # return [query]
+        t_scope_end = time.time()
+        
+        print(
+            f"L{len(p)}: average: {(t_scope_end-t_scope_start)/len(collected_times)} \nTime taken for scope {j}: {t_scope_end - t_scope_start} seconds, >>>>  length: {len(p)}, , std: {np.std(collected_times)},"
+            f"max: {max(collected_times)}, min: {min(collected_times)}, collected_times: {collected_times}, \nhist: {np.histogram(collected_times)}"
+        )
+    print("<<" * 100)
