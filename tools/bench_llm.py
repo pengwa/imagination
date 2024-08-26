@@ -109,8 +109,8 @@ for model_name in [
                 #    "ollama:phi3:mini", "ollama:phi3:medium",
                    "ollama:phi3:3.8b-mini-4k-instruct-q4_0", # 2.2GB
                    "ollama:phi3:3.8b-mini-4k-instruct-q4_1", # 2.4GB
-                #    "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S",
-                #    "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M",
+                   "ollama:phi3:3.8b-mini-4k-instruct-q4_K_S",
+                   "ollama:phi3:3.8b-mini-4k-instruct-q4_K_M",
                    "ollama:phi3:3.8b-mini-4k-instruct-q8_0",
                    #"ollama:phi3:3.8b-mini-128k-instruct-q4_0",
                    #"ollama:phi3:3.8b-mini-128k-instruct-q4_1",
